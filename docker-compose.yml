@@ -1,0 +1,68 @@
+version: "3"
+services:
+  teplosocial-nginx:
+    build:
+      context: teplosocial-nginx
+      dockerfile: Dockerfile
+    environment:
+      - APP_ENV=dev
+    ports:
+      - "80:80"
+    links:
+      - teplosocial-backend
+      - teplosocial-frontend
+    volumes:
+      - ../site:/site/teplosocial
+    extra_hosts:
+      - "teplosocial.tep:0.0.0.0"
+    networks:
+      default:
+        aliases:
+          - "teplosocial.tep"
+  teplosocial-mongo:
+    build:
+      context: teplosocial-mongo
+      dockerfile: Dockerfile
+    ports:
+      - "27017"
+    volumes:
+      - ../mongo:/data/db
+  teplosocial-mysql:
+    build:
+      context: teplosocial-mysql
+      dockerfile: Dockerfile
+    environment:
+      MARIADB_USER: dev_itv_kurs
+      MARIADB_PASSWORD: DevdrOvsFK4i7
+      MARIADB_ROOT_PASSWORD: RootdrOvsFK4i7
+    ports:
+      - "3306"
+    volumes:
+      - ../mysql:/var/lib/mysql
+  teplosocial-backend:
+    build:
+      context: teplosocial-backend
+      dockerfile: Dockerfile
+    environment:
+      - APP_ENV=dev
+    ports:
+      - "9000"
+    links:
+      - teplosocial-mongo
+      - teplosocial-mysql
+    volumes:
+      - ../site:/site/teplosocial
+    extra_hosts:
+      - "teplosocial.tep:0.0.0.0"
+  teplosocial-frontend:
+    build:
+      context: teplosocial-frontend
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=development
+    links:
+      - teplosocial-mongo
+    volumes:
+      - ../site/teplosocial-frontend:/site/teplosocial/teplosocial-frontend
+networks:
+  default:

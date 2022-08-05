@@ -1,0 +1,52 @@
+version: '3'
+services:
+  teplosocial-nginx:
+    build:
+      context: teplosocial-nginx
+      dockerfile: Dockerfile
+    environment:
+      - APP_ENV=dev
+    ports:
+      - "80:80"
+    links:
+      - teplosocial-backend
+      - teplosocial-frontend
+    volumes:
+      - /mnt/disk1/share/teplosocial/site:/site/teplosocial
+    extra_hosts:
+      - "teplosocial.tep:0.0.0.0"
+    networks:
+      default:
+        aliases:
+          - "teplosocial.tep"
+  teplosocial-backend:
+    build:
+      context: teplosocial-backend
+      dockerfile: Dockerfile
+    environment:
+      - APP_ENV=dev
+    ports:
+      - "9000:9000"
+    extra_hosts:
+      - "teplosocial.tep:0.0.0.0"
+      - "mongo.db:172.16.0.3"
+      - "mysql.db:172.16.0.3"
+    volumes:
+      - /mnt/disk1/share/teplosocial/site:/site/teplosocial
+  teplosocial-frontend:
+    build:
+      context: teplosocial-frontend
+      dockerfile: Dockerfile
+    environment:
+      - APP_ENV=dev
+    extra_hosts:
+      - "mongo.db:172.16.0.3"
+      - "mysql.db:172.16.0.3"
+    volumes:
+      - /mnt/disk1/share/teplosocial/site:/site/teplosocial
+    stdin_open: true
+    tty: true
+
+networks:
+  default:
+  
