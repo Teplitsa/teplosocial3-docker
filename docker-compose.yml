@@ -12,7 +12,7 @@ services:
       - teplosocial-backend
       - teplosocial-frontend
     volumes:
-      - ../site:/site/teplosocial
+      - ../wordpress:/site/wordpress
     extra_hosts:
       - "teplosocial.tep:0.0.0.0"
     networks:
@@ -51,7 +51,7 @@ services:
       - teplosocial-mongo
       - teplosocial-mysql
     volumes:
-      - ../site:/site/teplosocial
+      - ../wordpress:/site/wordpress
     extra_hosts:
       - "teplosocial.tep:0.0.0.0"
   teplosocial-frontend:
@@ -63,6 +63,6 @@ services:
     links:
       - teplosocial-mongo
     volumes:
-      - ../site/teplosocial-frontend:/site/teplosocial/teplosocial-frontend
+      - ../nextjs:/site/nextjs
 networks:
   default:

@@ -1,2 +1,13 @@
-# teplosocial3-docker
-The Docker files for the Teplosocial localhost installation
+# Docker
+
+To deploy the project to your local machine follow the instructions below:
+
+1. Create a new directory
+2. Open a terminal in the dicrectory and run the command:
+
+```
+git clone -q "git@github.com:Teplitsa/teplosocial3-docker.git" "./docker" \
+    -b main && \
+    chmod +x ./docker/setup.sh && \
+    ./docker/setup.sh
+```
