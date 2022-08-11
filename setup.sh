@@ -15,7 +15,6 @@ MYSQL_PASSWORD="DevdrOvsFK4i7"
 MYSQL_ROOT_PASSWORD="RootdrOvsFK4i7"
 
 GIT_VERSION="$(git --version)"
-WP_CLI_VERSION="$(wp --version)"
 WP_CORE_VERSION="5.9.3"
 
 FRONTEND_REPO="teplosocial3-frontend"
