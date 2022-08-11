@@ -5,6 +5,8 @@ RED_COLOR="\033[0;31m"
 GREEN_COLOR="\033[0;32m"
 BLUE_COLOR="\033[0;34m"
 
+WP_PLUGIN_REPO_URL="https://downloads.wordpress.org/plugin/"
+
 SITE_URL="http:\/\/teplosocial.tep" # escape some staff for sed command
 
 MYSQL_DB_NAME="dev_itv_kurs"
@@ -19,7 +21,7 @@ WP_CORE_VERSION="5.9.3"
 FRONTEND_REPO="teplosocial3-frontend"
 MICROSERVICES_REPO="teplosocial3-microservices"
 BACKEND_REPO="teplosocial3-backend"
-BACKEND_PLUGIN_REPO="teplosocial3-backend"
+BACKEND_PLUGIN_REPO="teplosocial3-backend-plugin"
 ATVETKA_PLUGIN_REPO="tst-atvetka"
 
 if [ -d "../mysql" ]; then
@@ -31,10 +33,10 @@ else
 fi
 
 if [ -d "../mongo" ]; then
-  echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}MongoDB directory are creating..."
-
   echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}MongoDB directory has already existed."
 else
+  echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}MongoDB directory are creating..."
+
   mkdir ../mongo
 fi
 
@@ -71,11 +73,56 @@ else
     > ../wordpress/wp-config.php
 
   rm ../wordpress/wp-config-sample.php
+
+  if [ -f "./wp-plugins.csv" ]; then
+    while IFS="," read -r plugin_name plugin_version plugin_url
+    do
+      if [ $plugin_name == "tst-atvetka" ]; then
+        continue
+      fi
+
+      if [ $plugin_name == "tps-backend-plugin" ]; then
+        continue
+      fi
+
+      if [ -d "../wordpress/wp-content/plugins/${plugin_name}" ]; then
+        echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}The plugin ${plugin_name} has already existed locally."
+      else
+        echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}The plugin ${plugin_name} are downloading..."
+
+        archive_name="${plugin_name}.zip"
+        archive_url=""
+
+        if [ $(curl -o /dev/null --silent -Iw '%{http_code}' "${WP_PLUGIN_REPO_URL}/${plugin_name}.${plugin_version}.zip") == 200 ]; then
+          archive_url="${WP_PLUGIN_REPO_URL}/${plugin_name}.${plugin_version}.zip"
+        elif [ $(curl -o /dev/null --silent -Iw '%{http_code}' "${WP_PLUGIN_REPO_URL}/${plugin_name}.zip") == 200 ]; then
+          archive_url="${WP_PLUGIN_REPO_URL}/${plugin_name}.zip"
+        else
+          archive_url="${plugin_url}"
+        fi
+
+        if [ $archive_url == "" ]; then
+          continue
+        fi
+
+        curl "${archive_url}" \
+          --output "${archive_name}" \
+          --location \
+          --silent
+
+        echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}The plugin ${plugin_name} are unzipping..."
+
+        unzip -q "${archive_name}" -d "../wordpress/wp-content/plugins"
+
+        rm "${archive_name}"
+      fi
+    done < <(tail -n +2 ./wp-plugins.csv)
+  fi
 fi
 
 if [ "$GIT_VERSION" != "command not found" ]; then
 
-  if [ -d "../teplosocial-frontend" ]; then
+  if [ -d "../nextjs" ]; then
     echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}Frontend repo has already existed locally."
   else
     echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}Frontend repo are clonning..."
@@ -84,7 +131,7 @@ if [ "$GIT_VERSION" != "command not found" ]; then
       -b main
   fi
 
-  if [ -d "../teplosocial-microservices" ]; then
+  if [ -d "../microservices" ]; then
     echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}Microservices repo has already existed locally."
   else
     echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}Microservices repo are clonning..."
@@ -101,11 +148,30 @@ if [ "$GIT_VERSION" != "command not found" ]; then
     git clone -q "git@github.com:Teplitsa/${BACKEND_REPO}.git" "../wordpress/wp-content/themes/teplosocial-backend" \
       -b main
 
-    if [ -d "../wordpress/wp-content/themes/teplosocial-backend" ]; then
-      echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}Backend plugin repo are clonning..."
+    if [ -d "../wordpress/wp-content/plugins/sfwd-lms" ]; then
+      echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}LearnDash are being patched..."
 
-      cp ../wordpress/wp-content/themes/teplosocial-backend/tps-backend-plugin ../wordpress/wp-content/plugins/tps-backend-plugin 
+      cp -f \
+        ../wordpress/wp-content/themes/teplosocial-backend/ld-patch/sfwd-lms/includes/rest-api/v1/class-ld-rest-quizzes-controller.php \
+        ../wordpress/wp-content/plugins/sfwd-lms/includes/rest-api/v1/class-ld-rest-quizzes-controller.php
+
+      cp -f \
+        ../wordpress/wp-content/themes/teplosocial-backend/ld-patch/sfwd-lms/includes/lib/wp-pro-quiz/lib/view/WpProQuiz_View_QuestionEdit.php \
+        ../wordpress/wp-content/plugins/sfwd-lms/includes/lib/wp-pro-quiz/lib/view/WpProQuiz_View_QuestionEdit.php
+
+      cp -f \
+        ../wordpress/wp-content/themes/teplosocial-backend/ld-patch/sfwd-lms/includes/lib/wp-pro-quiz/lib/controller/WpProQuiz_Controller_Question.php \
+        ../wordpress/wp-content/plugins/sfwd-lms/includes/lib/wp-pro-quiz/lib/controller/WpProQuiz_Controller_Question.php
     fi
+  fi
+
+  if [ -d "../wordpress/wp-content/plugins/tps-backend-plugin" ]; then
+    echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}Backend plugin repo has already existed locally."
+  else
+    echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}Backend plugin repo are clonning..."
+
+    git clone -q "git@github.com:Teplitsa/${BACKEND_PLUGIN_REPO}.git" "../wordpress/wp-content/plugins/tps-backend-plugin" \
+      -b main
   fi
 
   if [ -d "../wordpress/wp-content/plugins/${ATVETKA_PLUGIN_REPO}" ]; then
