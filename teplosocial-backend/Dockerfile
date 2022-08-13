@@ -1,4 +1,4 @@
-FROM wordpress:5.6-php7.4-fpm
+FROM wordpress:6.0.1-php8.1-fpm
 
 RUN apt update
 RUN apt install -y nano
@@ -14,7 +14,7 @@ RUN mv /tmp/wp-cli.phar /usr/local/bin/wp
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 RUN pecl install mongodb
 RUN echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/20-mongodb.ini
-COPY start.sh /site/
+COPY backend-entrypoint.sh /site/shell/
+RUN chmod +x /site/shell/backend-entrypoint.sh
 
-#CMD ["php-fpm"]
-CMD ["/bin/bash", "/site/start.sh"]
+CMD ["/bin/bash", "/site/shell/backend-entrypoint.sh"]

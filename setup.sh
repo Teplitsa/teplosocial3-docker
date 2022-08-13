@@ -6,11 +6,13 @@ GREEN_COLOR="\033[0;32m"
 BLUE_COLOR="\033[0;34m"
 
 WP_PLUGIN_REPO_URL="https://downloads.wordpress.org/plugin/"
+WP_DB_SOURCE_URL="https://kurs.te-st.ru/source-db_bc1eab85ac6e9eee68ee34d514d527f1.zip"
+WP_UPLOADS_SOURCE_URL="https://kurs.te-st.ru/wp-content/uploads_bc1eab85ac6e9eee68ee34d514d527f1.zip"
 
 SITE_URL="http:\/\/teplosocial.tep" # escape some staff for sed command
 
-MYSQL_DB_NAME="dev_itv_kurs"
-MYSQL_USER="dev_itv_kurs"
+MYSQL_DB_NAME="kurs"
+MYSQL_USER="kurs_user"
 MYSQL_PASSWORD="DevdrOvsFK4i7"
 MYSQL_ROOT_PASSWORD="RootdrOvsFK4i7"
 
@@ -29,6 +31,25 @@ else
   echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}MySQL directory are creating..."
 
   mkdir ../mysql
+fi
+
+if [ -f "../mysql/source-db.sql" ]; then
+  echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}MySQL dump has already had a dump."
+else
+  if [ $(curl -o /dev/null --silent -Iw '%{http_code}' "${WP_DB_SOURCE_URL}") == 200 ]; then
+    echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}Mysql dump are downloading..."
+
+    curl "${WP_DB_SOURCE_URL}" \
+      --output ../mysql/source-db.zip \
+      --location \
+      --silent
+
+    echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}Mysql dump are unzipping..."
+
+    unzip -q ../mysql/source-db.zip -d ../mysql
+
+    rm ../mysql/source-db.zip
+  fi
 fi
 
 if [ -d "../mongo" ]; then
@@ -65,13 +86,32 @@ else
     sed "s/^.*DB_NAME.*$/define('DB_NAME', '${MYSQL_DB_NAME}');/" | \
     sed "s/^.*DB_USER.*$/define('DB_USER', '${MYSQL_USER}');/" | \
     sed "s/^.*DB_PASSWORD.*$/define('DB_PASSWORD', '${MYSQL_PASSWORD}');/" | \
-    sed "s/^.*DB_HOST.*$/define('DB_HOST', 'teplosocial-mysql:3306');/" | \
+    sed "s/^.*DB_HOST.*$/define('DB_HOST', 'teplosocial-mysql');/" | \
     sed "s/^\$table_prefix.*$/\$table_prefix = 'gghaq_';/" | \
     sed "s/^define.+WP_DEBUG.*$/define('WP_DEBUG', true);\ndefine('WP_DEBUG_DISPLAY', false);\ndefine('WP_DEBUG_LOG', true);/" | \
     sed "s/^.*Add any custom values.*$/\n\ndefine('WP_HOME', '${SITE_URL}');\ndefine('WP_SITEURL', '${SITE_URL}');\ndefine('UPLOADS', 'wp-content\/uploads');/" \
     > ../wordpress/wp-config.php
 
   rm ../wordpress/wp-config-sample.php
+
+  if [ -d "../wordpress/wp-content/uploads" ]; then
+    echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}Uploads directory has already existed locally."
+  else
+    if [ $(curl -o /dev/null --silent -Iw '%{http_code}' "${WP_UPLOADS_SOURCE_URL}") == 200 ]; then
+      echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}Uploads directory are downloading..."
+
+      curl "${WP_UPLOADS_SOURCE_URL}" \
+        --output uploads.zip \
+        --location \
+        --silent
+
+      echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}Uploads directory are unzipping..."
+
+      unzip -q uploads.zip -d "../wordpress/wp-content"
+
+      rm uploads.zip
+    fi
+  fi
 
   if [ -f "./wp-plugins.csv" ]; then
     while IFS="," read -r plugin_name plugin_version plugin_url

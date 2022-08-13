@@ -2,11 +2,12 @@ FROM node:16
 
 ENV NPM_CONFIG_LOGLEVEL info
 
-WORKDIR /site/teplosocial/teplosocial-frontend/
-COPY package*.json .
-RUN npm install
-COPY . .
+WORKDIR /site/nextjs/
 
-ENV PATH /site/teplosocial/teplosocial-frontend/node_modules/.bin:$PATH
+COPY docker/teplosocial-frontend/frontend-entrypoint.sh ../shell/frontend-entrypoint.sh
+
+RUN chmod +x ../shell/frontend-entrypoint.sh
+
+ENTRYPOINT ["../shell/frontend-entrypoint.sh"]
 
 CMD ["npm", "run", "dev"]

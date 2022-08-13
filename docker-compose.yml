@@ -8,6 +8,7 @@ services:
       - APP_ENV=dev
     ports:
       - "80:80"
+      - "5000:5000"
     links:
       - teplosocial-backend
       - teplosocial-frontend
@@ -27,18 +28,34 @@ services:
       - "27017"
     volumes:
       - ../mongo:/data/db
+  teplosocial-mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8001:8081
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=teplosocial-mongo
   teplosocial-mysql:
     build:
-      context: teplosocial-mysql
-      dockerfile: Dockerfile
+      context: ../
+      dockerfile: docker/teplosocial-mysql/Dockerfile
+    restart: always
     environment:
-      MARIADB_USER: dev_itv_kurs
+      MARIADB_DATABASE: kurs
+      MARIADB_USER: kurs_user
       MARIADB_PASSWORD: DevdrOvsFK4i7
       MARIADB_ROOT_PASSWORD: RootdrOvsFK4i7
     ports:
       - "3306"
     volumes:
       - ../mysql:/var/lib/mysql
+  teplosocial-phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8000:80
+    environment:
+      - PMA_HOST=teplosocial-mysql
   teplosocial-backend:
     build:
       context: teplosocial-backend
@@ -56,13 +73,23 @@ services:
       - "teplosocial.tep:0.0.0.0"
   teplosocial-frontend:
     build:
-      context: teplosocial-frontend
-      dockerfile: Dockerfile
+      context: ../
+      dockerfile: docker/teplosocial-frontend/Dockerfile
     environment:
       - NODE_ENV=development
     links:
       - teplosocial-mongo
     volumes:
       - ../nextjs:/site/nextjs
+  teplosocial-microservice-notifications:
+    build:
+      context: ../
+      dockerfile: docker/teplosocial-microservice-notifications/Dockerfile
+    environment:
+      - NODE_ENV=development
+    links:
+      - teplosocial-mongo
+    volumes:
+      - ../microservices/notifications:/site/microservices/notifications
 networks:
   default:
