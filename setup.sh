@@ -17,7 +17,7 @@ MYSQL_PASSWORD="DevdrOvsFK4i7"
 MYSQL_ROOT_PASSWORD="RootdrOvsFK4i7"
 
 GIT_VERSION="$(git --version)"
-WP_CORE_VERSION="5.9.3"
+WP_CORE_VERSION="5.6.1"
 
 FRONTEND_REPO="teplosocial3-frontend"
 MICROSERVICES_REPO="teplosocial3-microservices"
@@ -83,13 +83,13 @@ else
   echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}WordPress config is customizing..."
 
   cat ../wordpress/wp-config-sample.php | \
-    sed "s/^.*DB_NAME.*$/define('DB_NAME', '${MYSQL_DB_NAME}');/" | \
-    sed "s/^.*DB_USER.*$/define('DB_USER', '${MYSQL_USER}');/" | \
-    sed "s/^.*DB_PASSWORD.*$/define('DB_PASSWORD', '${MYSQL_PASSWORD}');/" | \
-    sed "s/^.*DB_HOST.*$/define('DB_HOST', 'teplosocial-mysql');/" | \
-    sed "s/^\$table_prefix.*$/\$table_prefix = 'gghaq_';/" | \
-    sed "s/^define.+WP_DEBUG.*$/define('WP_DEBUG', true);\ndefine('WP_DEBUG_DISPLAY', false);\ndefine('WP_DEBUG_LOG', true);/" | \
-    sed "s/^.*Add any custom values.*$/\n\ndefine('WP_HOME', '${SITE_URL}');\ndefine('WP_SITEURL', '${SITE_URL}');\ndefine('UPLOADS', 'wp-content\/uploads');/" \
+    sed "s/^.\+DB_NAME.\+$/define('DB_NAME', '${MYSQL_DB_NAME}');/" | \
+    sed "s/^.\+DB_USER.\+$/define('DB_USER', '${MYSQL_USER}');/" | \
+    sed "s/^.\+DB_PASSWORD.\+$/define('DB_PASSWORD', '${MYSQL_PASSWORD}');/" | \
+    sed "s/^.\+DB_HOST.\+$/define('DB_HOST', 'teplosocial-mysql');/" | \
+    sed "s/^\$table_prefix.\+$/\$table_prefix = 'gghaq_';/" | \
+    sed "s/^define.\+WP_DEBUG.\+$/define('WP_DEBUG', true);\ndefine('WP_DEBUG_DISPLAY', false);\ndefine('WP_DEBUG_LOG', true);/" | \
+    sed "s/^.\+stop editing.\+$/\n\ndefine('WP_HOME', '${SITE_URL}');\ndefine('WP_SITEURL', '${SITE_URL}');\ndefine('UPLOADS', 'wp-content\/uploads');/" \
     > ../wordpress/wp-config.php
 
   rm ../wordpress/wp-config-sample.php

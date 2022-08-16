@@ -1,4 +1,4 @@
-FROM wordpress:6.0.1-php8.1-fpm
+FROM wordpress:5.6.1-php8.0-fpm
 
 RUN apt update
 RUN apt install -y nano
