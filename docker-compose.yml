@@ -22,8 +22,9 @@ services:
           - "teplosocial.tep"
   teplosocial-mongo:
     build:
-      context: teplosocial-mongo
-      dockerfile: Dockerfile
+      context: ../
+      dockerfile: docker/teplosocial-mongo/Dockerfile
+    restart: always
     ports:
       - "27017"
     volumes:
@@ -81,15 +82,15 @@ services:
       - teplosocial-mongo
     volumes:
       - ../nextjs:/site/nextjs
-  teplosocial-microservice-notifications:
-    build:
-      context: ../
-      dockerfile: docker/teplosocial-microservice-notifications/Dockerfile
-    environment:
-      - NODE_ENV=development
-    links:
-      - teplosocial-mongo
-    volumes:
-      - ../microservices/notifications:/site/microservices/notifications
+  # teplosocial-microservice-notifications:
+  #   build:
+  #     context: ../
+  #     dockerfile: docker/teplosocial-microservice-notifications/Dockerfile
+  #   environment:
+  #     - NODE_ENV=development
+  #   links:
+  #     - teplosocial-mongo
+  #   volumes:
+  #     - ../microservices/notifications:/site/microservices/notifications
 networks:
   default:
