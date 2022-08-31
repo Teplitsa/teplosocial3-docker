@@ -76,6 +76,11 @@ else
 
   rm wordpress-core.zip
 
+  # ahaenor's fix for Win10
+  mkdir ../wordpress
+  chmod 755 ../wordpress
+  # /ahaenor's fix for Win10
+  
   mv "../WordPress-${WP_CORE_VERSION}" ../wordpress
 
   echo -e "${BLUE_COLOR}INFO: ${NORMAL_COLOR}WordPress directory is created now."
